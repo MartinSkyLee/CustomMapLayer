@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no"/>
+    <title>Intro to MapView - Create a 2D map</title>
+    <style>
+        html,
+        body,
+        #viewDiv {
+            padding: 0;
+            margin: 0;
+            height: 100%;
+            width: 100%;
+        }
+    </style>
+    <!--<link rel="stylesheet" href="https://js.arcgis.com/4.11/esri/themes/light/main.css" />-->
+    <link rel="stylesheet" href="http://10.9.53.103:9988/arcgis_js_api/library/4.11/esri/themes/light/main.css"/>
+    <script type="text/javascript">
+        dojoConfig = {
+            packages: [{
+                name: 'extras',
+                location: this.location.pathname.replace(/\/[^/]+$/, "") + "/extras"
+            }]
+        };//dojoConfig必须set在加载dojo.js之前，否则在控制台调试时会发现报错。
+    </script>
+    <!--<script src="https://js.arcgis.com/4.11/"></script>-->
+    <script src="http://10.9.53.103:9988/arcgis_js_api/library/4.11/dojo/dojo.js"></script>
+    <script>
+        require([
+            "esri/Map",
+            "esri/views/MapView",
+            "extras/GoogleMapLayer"
+        ], function (Map, MapView, GoogleMapLayer) {
+
+            var googleMapLayer = new GoogleMapLayer({
+                urlTemplate: "http://www.google.cn/maps/vt/lyrs=s@157&hl=zh-CN&gl=cn&x={x}&y={y}&z={z}&s=Galil"
+            });
+
+            var annoGoogleMakerLayer = new GoogleMapLayer({
+                urlTemplate: "http://www.google.cn/maps/vt/lyrs=h@177000000&hl=zh-CN&gl=cn&x={x}&y={y}&z={z}&s=Galil"
+            });
+
+            var map = new Map({
+                basemap: {
+                    baseLayers: [googleMapLayer, annoGoogleMakerLayer]
+                }
+            });
+
+            var view = new MapView({
+                container: "viewDiv", // Reference to the scene div created in step 5
+                map: map, // Reference to the map object created before the scene
+                zoom: 4, // Sets zoom level based on level of detail (LOD)
+                center: [105.051, 33.78]
+            });
+
+            view.on("click", function (event) {
+                view.popup.autoOpenEnabled = false;
+                var lat = Math.round(event.mapPoint.latitude * 1000) / 1000;
+                var lon = Math.round(event.mapPoint.longitude * 1000) / 1000;
+                view.popup.dockEnabled = true;
+                view.popup.open({
+                    title: "Reverse geocode: [" + lon + "," + lat + "]",
+//                    location: event.mapPoint,
+                    content: "This is a point of interest"
+                });
+            });
+        });
+    </script>
+</head>
+<body>
+<div id="viewDiv"></div>
+</body>
+</html>

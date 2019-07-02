@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no"/>
+    <title>Intro to MapView - Create a 2D map</title>
+    <style>
+        html,
+        body,
+        #viewDiv {
+            padding: 0;
+            margin: 0;
+            height: 100%;
+            width: 100%;
+        }
+    </style>
+    <!--<link rel="stylesheet" href="https://js.arcgis.com/4.11/esri/themes/light/main.css" />-->
+    <link rel="stylesheet" href="http://10.9.53.103:9988/arcgis_js_api/library/4.11/esri/themes/light/main.css"/>
+    <script type="text/javascript">
+        dojoConfig = {
+            packages: [{
+                name: 'extras',
+                location: this.location.pathname.replace(/\/[^/]+$/, "") + "/extras"
+            }]
+        };//dojoConfig必须set在加载dojo.js之前，否则在控制台调试时会发现报错。
+    </script>
+    <!--<script src="https://js.arcgis.com/4.11/"></script>-->
+    <script src="http://10.9.53.103:9988/arcgis_js_api/library/4.11/dojo/dojo.js"></script>
+    <script>
+        require([
+            "esri/Map",
+            "esri/views/MapView",
+            "esri/layers/WebTileLayer",
+            "extras/TDTLayer"
+        ], function (Map, MapView, WebTileLayer, TDTLayer) {
+
+            var tdtLayer = new TDTLayer({
+                urlTemplate: "http://t0.tianditu.com/DataServer?T=vec_w&x={col}&y={row}&l={level}&tk=c098cedca4b93ed2f825b4062c46aed4"
+            });
+
+            var annoTDTLayer = new TDTLayer({
+                id: "anooMarkerLayer",
+                title: "anooMarkerLayer",
+                urlTemplate: "http://t0.tianditu.com/DataServer?T=cva_w&x={col}&y={row}&l={level}&tk=c098cedca4b93ed2f825b4062c46aed4"
+            })
+
+            var map = new Map({
+                basemap: {
+                    baseLayers: [tdtLayer, annoTDTLayer]
+                }
+            });
+
+            var view = new MapView({
+                container: "viewDiv", // Reference to the scene div created in step 5
+                map: map, // Reference to the map object created before the scene
+                zoom: 4, // Sets zoom level based on level of detail (LOD)
+                center: [105.051, 33.78]
+            });
+
+            view.on("click", function (event) {
+                view.popup.autoOpenEnabled = false;
+                var lat = Math.round(event.mapPoint.latitude * 1000) / 1000;
+                var lon = Math.round(event.mapPoint.longitude * 1000) / 1000;
+                view.popup.dockEnabled = true;
+                view.popup.open({
+                    title: "Reverse geocode: [" + lon + "," + lat + "]",
+//                    location: event.mapPoint,
+                    content: "This is a point of interest"
+                });
+            });
+        });
+    </script>
+</head>
+<body>
+<div id="viewDiv"></div>
+</body>
+</html>
